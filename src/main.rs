@@ -264,11 +264,14 @@ fn ball_collision_system(
                 // scorable colliders should be despawned and increment the scoreboard on collision
                 if let Collider::Scorable = *collider {
                     scoreboard.score += 1;
-                    if scoreboard.score % 4 == 0 {
+                    if scoreboard.score % 3 == 0 {
                         let material = materials.add(Color::rgb(0.5, 0.5, 1.0).into());
-                        //for bundle in new_bundles(material, transform, sprite) {
-                        //    commands.spawn_bundle(bundle).insert(Collider::Scorable);
-                        //}
+                        let grid = abstraction::Grid::default();
+                        let piece = Piece::random();
+                        use abstraction::Render;
+                        let (grid, _) = piece.render(grid, abstraction::Position(2, 2)).unwrap();
+
+                        insert_bricks(&mut commands, &material, grid)
                     }
                     commands.entity(collider_entity).despawn();
                 }
@@ -304,9 +307,4 @@ fn ball_collision_system(
             }
         }
     }
-}
-
-fn new_bundles(material: Handle<ColorMaterial>, transform: &Transform, sprite: &Sprite) -> Vec<SpriteBundle> {
-    let piece = abstraction::Piece::random();
-    unimplemented!()
 }
