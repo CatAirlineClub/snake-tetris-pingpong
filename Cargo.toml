@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 rand = "0.8"
-bevy = "0.5"
+bevy = { version = "0.5", features = ["dynamic"] }
