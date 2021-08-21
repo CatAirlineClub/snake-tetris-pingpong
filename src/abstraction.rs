@@ -108,6 +108,18 @@ impl Render for JumpRight {
     }
 }
 
+impl Render for Direction {
+    fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
+        match self {
+            Direction::Up(x) => x.render(grid, pos),
+            Direction::Down(x) => x.render(grid, pos),
+            Direction::Left(x) => x.render(grid, pos),
+            Direction::Right(x) => x.render(grid, pos),
+            Direction::JumpRight(x) => x.render(grid, pos),
+        }
+    }
+}
+
 impl<Head: Render, Tail: Render> Render for Flow<Head, Tail> {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
         let (grid, pos) = self.0.render(grid, pos)?;
