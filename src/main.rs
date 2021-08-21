@@ -10,6 +10,8 @@ use bevy::{
     sprite::collide_aabb::{collide, Collision},
 };
 
+use crate::abstraction::Piece;
+
 /// An implementation of the classic game "Snake"
 fn main() {
     App::build()
@@ -151,6 +153,22 @@ fn setup(
         .insert(Collider::Solid);
 
     // Add bricks
+    let brick_material = materials.add(Color::rgb(0.5, 0.5, 1.0).into());
+
+    let grid = abstraction::Grid::default();
+    let initial_piece = Piece::random();
+    use abstraction::Render;
+    let (grid, _) = initial_piece.render(grid, abstraction::Position(2, 2)).unwrap();
+
+    insert_bricks(&mut commands, &brick_material, grid)
+    
+}
+
+fn insert_bricks(
+    commands: &mut Commands,
+    brick_material: &Handle<ColorMaterial>,
+    grid: abstraction::Grid) {
+
     let brick_rows = H;
     let brick_columns = W;
     let brick_spacing = 0.0;
@@ -158,13 +176,7 @@ fn setup(
     let bricks_width = brick_columns as f32 * (brick_size.x + brick_spacing) - brick_spacing;
     // center the bricks and move them up a bit
     let bricks_offset = Vec3::new(-(bricks_width - brick_size.x) / 2.0, -100.0, 0.0);
-    let brick_material = materials.add(Color::rgb(0.5, 0.5, 1.0).into());
 
-    let grid = abstraction::Grid::default();
-    let initial_piece = rand::random::<abstraction::Piece>();
-    use abstraction::Render;
-    let (grid, _) = initial_piece.render(grid, abstraction::Position(2, 2)).unwrap();
-    eprintln!("{:?}", grid);
 
     for row in 0..brick_rows {
         let y_position = row as f32 * (brick_size.y + brick_spacing);
@@ -231,6 +243,7 @@ fn scoreboard_system(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
 
 fn ball_collision_system(
     mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
     mut scoreboard: ResMut<Scoreboard>,
     mut ball_query: Query<(&mut Ball, &Transform, &Sprite)>,
     collider_query: Query<(Entity, &Collider, &Transform, &Sprite)>,
@@ -251,6 +264,12 @@ fn ball_collision_system(
                 // scorable colliders should be despawned and increment the scoreboard on collision
                 if let Collider::Scorable = *collider {
                     scoreboard.score += 1;
+                    if scoreboard.score % 4 == 0 {
+                        let material = materials.add(Color::rgb(0.5, 0.5, 1.0).into());
+                        //for bundle in new_bundles(material, transform, sprite) {
+                        //    commands.spawn_bundle(bundle).insert(Collider::Scorable);
+                        //}
+                    }
                     commands.entity(collider_entity).despawn();
                 }
 
@@ -287,3 +306,7 @@ fn ball_collision_system(
     }
 }
 
+fn new_bundles(material: Handle<ColorMaterial>, transform: &Transform, sprite: &Sprite) -> Vec<SpriteBundle> {
+    let piece = abstraction::Piece::random();
+    unimplemented!()
+}

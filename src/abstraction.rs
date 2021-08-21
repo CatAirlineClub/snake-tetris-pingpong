@@ -195,6 +195,12 @@ impl Render for Piece {
     }
 }
 
+impl Piece {
+    pub fn random() -> Self {
+        rand::random()
+    }
+}
+
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
