@@ -62,68 +62,55 @@ pub trait Render {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error>;
 }
 
-impl Render for Flow<(), ()> {
-    fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
-        Ok((grid, pos))
-    }
-}
-
 impl Render for () {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
         Ok((grid, pos))
     }
 }
 
-impl<Tail: Render> Render for Flow<Up, Tail> {
+impl Render for Up {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {  
-        step(self.1, grid, pos,
+        step((), grid, pos,
          |pos| pos.0 == 0,
          |mut pos| { pos.0 -= 1; pos })
     }
 }
 
-impl<Tail: Render> Render for Flow<Down, Tail> {
+impl Render for Down {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> { 
-        step(self.1, grid, pos,
+        step((), grid, pos,
          |pos| pos.0 == crate::W - 1,
          |mut pos| { pos.0 += 1; pos })
     }
 }
 
-impl<Tail: Render>  Render for Flow<Left, Tail> {
+impl Render for Left {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
-        step(self.1, grid, pos,
+        step((), grid, pos,
          |pos| pos.1 == 0,
          |mut pos| { pos.1 -= 1; pos })
     }
 }
 
-impl<Tail: Render>  Render for Flow<Right, Tail> {
+impl Render for Right {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
-        step(self.1, grid, pos,
+        step((), grid, pos,
             |pos| pos.1 == crate::H - 1,
             |mut pos| { pos.1 += 1; pos })
     }
 }
 
-impl Render for Flow<JumpRight, ()> {
+impl Render for JumpRight {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
-        step(self.1, grid, pos,
+        step((), grid, pos,
             |pos| pos.1 >= crate::H - 2,
             |mut pos| { pos.1 += 2; pos })
     }
 }
 
-impl<Head, Tail> Render for Flow<Direction, Flow<Head, Tail>> where Flow<Head, Tail>: Render {
+impl<Head: Render, Tail: Render> Render for Flow<Head, Tail> {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
-        let (grid, pos) = match self.0 {
-            Direction::Up(_) => Flow(Up, ()).render(grid, pos),
-            Direction::Down(_) => Flow(Down, ()).render(grid, pos),
-            Direction::Left(_) => Flow(Left, ()).render(grid, pos),
-            Direction::Right(_) => Flow(Right, ()).render(grid, pos),
-            Direction::JumpRight(_) => Flow(JumpRight, ()).render(grid, pos),
-        }?;
-
+        let (grid, pos) = self.0.render(grid, pos)?;
         self.1.render(grid, pos)
     }
 }
