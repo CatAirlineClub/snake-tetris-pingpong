@@ -47,11 +47,12 @@ trait Snake {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Flow<Direction, Tail: Default>(Direction, Tail);
 
-enum Error {
+#[derive(Debug)]
+pub enum Error {
     Collision
 }
 
-trait Render {
+pub trait Render {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error>;
 }
 
@@ -141,21 +142,22 @@ fn step<Tail: Render>(
 }
 
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Form {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Form {
     Present, Void
 }
 
 impl Form {
-    fn present(&self) -> bool {
+    pub fn present(&self) -> bool {
         self == &Self::Present
     }
 }
 
-struct Grid([[Form; crate::W]; crate::H]);
+#[derive(Debug)]
+pub struct Grid([[Form; crate::W]; crate::H]);
 
 impl Grid {
-    fn pos(&self, pos: Position) -> Form {
+    pub fn pos(&self, pos: Position) -> Form {
         self.0[pos.0][pos.1]
     }
     fn set(&mut self, pos: Position) {
@@ -163,8 +165,14 @@ impl Grid {
     }
 }
 
+impl Default for Grid {
+    fn default() -> Self {
+        Grid([[Form::Void; crate::W]; crate::H])
+    }
+}
+
 #[derive(Clone, Copy)]
-struct Position(usize, usize);
+pub struct Position(pub usize, pub usize);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Piece {
