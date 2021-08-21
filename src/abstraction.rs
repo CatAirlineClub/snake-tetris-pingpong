@@ -44,8 +44,14 @@ trait Snake {
     fn direction() -> Direction;
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-pub struct Flow<Direction, Tail: Default>(Direction, Tail);
+#[derive(Clone, Copy, Debug)]
+pub struct Flow<Direction, Tail>(Direction, Tail);
+
+impl<Head, Tail> Default for Flow<Head, Tail> where Head: Default, Tail: Default {
+    fn default() -> Self {
+        Flow(Default::default(), Default::default())
+    }
+}
 
 #[derive(Debug)]
 pub enum Error {
@@ -68,7 +74,7 @@ impl Render for () {
     }
 }
 
-impl<Tail: Render + Default> Render for Flow<Up, Tail> {
+impl<Tail: Render> Render for Flow<Up, Tail> {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {  
         step(self.1, grid, pos,
          |pos| pos.0 == 0,
@@ -76,7 +82,7 @@ impl<Tail: Render + Default> Render for Flow<Up, Tail> {
     }
 }
 
-impl<Tail: Render + Default> Render for Flow<Down, Tail> {
+impl<Tail: Render> Render for Flow<Down, Tail> {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> { 
         step(self.1, grid, pos,
          |pos| pos.0 == crate::W - 1,
@@ -84,7 +90,7 @@ impl<Tail: Render + Default> Render for Flow<Down, Tail> {
     }
 }
 
-impl<Tail: Render + Default>  Render for Flow<Left, Tail> {
+impl<Tail: Render>  Render for Flow<Left, Tail> {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
         step(self.1, grid, pos,
          |pos| pos.1 == 0,
@@ -92,7 +98,7 @@ impl<Tail: Render + Default>  Render for Flow<Left, Tail> {
     }
 }
 
-impl<Tail: Render + Default>  Render for Flow<Right, Tail> {
+impl<Tail: Render>  Render for Flow<Right, Tail> {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
         step(self.1, grid, pos,
             |pos| pos.1 == crate::H - 1,
@@ -108,7 +114,7 @@ impl Render for Flow<JumpRight, ()> {
     }
 }
 
-impl<Head, Tail> Render for Flow<Direction, Flow<Head, Tail>> where Flow<Head, Tail>: Render, Head: Default, Tail: Default {
+impl<Head, Tail> Render for Flow<Direction, Flow<Head, Tail>> where Flow<Head, Tail>: Render {
     fn render(self, grid: Grid, pos: Position) -> Result<(Grid, Position), Error> {
         let (grid, pos) = match self.0 {
             Direction::Up(_) => Flow(Up, ()).render(grid, pos),
